@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="form-card">
+    <h1>🍿 What Should I Watch?</h1>
+    <form method="POST">
+        <textarea name="mood" placeholder="e.g. something funny and short, or a dark thriller like Breaking Bad..." required></textarea>
+        <button type="submit">Get Recommendation</button>
+    </form>
+</div>
+
+{% if recommendation %}
+<div class="recommendation-card">
+    <img src="{{ recommendation.poster }}" alt="{{ recommendation.title }}">
+    <div class="rec-body">
+        <h2>{{ recommendation.title }}</h2>
+        <p>{{ recommendation.reason }}</p>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

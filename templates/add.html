@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="form-card">
+    <h1>Add a Movie</h1>
+    <form method="POST" id="movieForm">
+        
+        <div class="search-wrapper">
+            <input type="text" id="titleSearch" placeholder="Search movie title..." autocomplete="off" required>
+            <input type="hidden" name="title" id="titleHidden">
+            <div id="suggestions" class="suggestions-box"></div>
+        </div>
+
+        <input type="text" name="genre" placeholder="Genre" required>
+        
+        <select name="status" id="statusSelect">
+            <option value="watchlist">Want to Watch</option>
+            <option value="watched">Watched</option>
+        </select>
+
+        <input type="number" name="rating" id="ratingInput" placeholder="Rating (1-10)" min="1" max="10" style="display: none;">
+        
+        <textarea name="notes" placeholder="Your notes..."></textarea>
+        <button type="submit">Add Movie</button>
+    </form>
+</div>
+
+<script>
+const statusSelect = document.getElementById('statusSelect');
+const ratingInput = document.getElementById('ratingInput');
+
+function toggleRating() {
+    if (statusSelect.value === 'watched') {
+        ratingInput.style.display = 'block';
+        ratingInput.required = true;
+    } else {
+        ratingInput.style.display = 'none';
+        ratingInput.required = false;
+        ratingInput.value = '';
+    }
+}
+
+statusSelect.addEventListener('change', toggleRating);
+toggleRating(); // run once on page load
+
+// keep your existing search script below this
+const searchInput = document.getElementById('titleSearch');
+const hiddenInput = document.getElementById('titleHidden');
+const suggestionsBox = document.getElementById('suggestions');
+let debounceTimer;
+
+searchInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const query = searchInput.value;
+    hiddenInput.value = query;
+
+    if (query.length < 2) {
+        suggestionsBox.innerHTML = '';
+        return;
+    }
+
+    debounceTimer = setTimeout(() => {
+        fetch(`/search-movies?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(movies => {
+                suggestionsBox.innerHTML = '';
+                movies.forEach(movie => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerHTML = `
+                        <img src="${movie.poster !== 'N/A' ? movie.poster : 'https://via.placeholder.com/40x60'}" alt="">
+                        <span>${movie.title} (${movie.year})</span>
+                    `;
+                    item.addEventListener('click', () => {
+                        searchInput.value = movie.title;
+                        hiddenInput.value = movie.title;
+                        suggestionsBox.innerHTML = '';
+                    });
+                    suggestionsBox.appendChild(item);
+                });
+            });
+    }, 300);
+});
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrapper')) {
+        suggestionsBox.innerHTML = '';
+    }
+});
+</script>
+
+{% endblock %}

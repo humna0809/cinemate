@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>My Watchlist</h1>
+
+<div class="tabs">
+    <a href="/?tab=watched" class="tab {% if active_tab == 'watched' %}active{% endif %}">✅ Watched</a>
+    <a href="/?tab=watchlist" class="tab {% if active_tab == 'watchlist' %}active{% endif %}">🔖 Want to Watch</a>
+</div>
+
+<div class="movie-grid">
+    {% for movie in movies %}
+        <div class="movie-card">
+            <img src="{{ movie.poster_url }}" class="poster" alt="{{ movie.title }}">
+            <div class="card-body">
+                <div class="card-header">
+                    <h3>{{ movie.title }}</h3>
+                    {% if movie.status == 'watched' %}
+                        <span class="rating">⭐ {{ movie.rating }}/10</span>
+                    {% endif %}
+                </div>
+                <p class="genre">{{ movie.genre }}</p>
+                <p class="notes">{{ movie.notes }}</p>
+                <div class="card-actions">
+                    <a href="/edit/{{ movie.id }}">Edit</a>
+                    <a href="/delete/{{ movie.id }}">Delete</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if movies|length == 0 %}
+        <p class="empty-state">No movies here yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
