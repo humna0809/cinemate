@@ -3,12 +3,12 @@ import os
 from supabase import create_client
 from dotenv import load_dotenv
 import requests
-import google.generativeai as genai
+from groq import Groq
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel('gemini-2.0-flash')
 
 load_dotenv()
+
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # needed for sessions
@@ -159,9 +159,11 @@ TITLE: [movie/show name]
 REASON: [2-3 sentence friendly explanation of why this fits, referencing their taste]
 """
 
-    response = gemini_model.generate_content(prompt)
-    return response.text
-
+    response = groq_client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content
 @app.route('/recommend', methods=['GET', 'POST'])
 def recommend():
     if 'user' not in session:
